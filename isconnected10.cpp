@@ -2,18 +2,25 @@
 #include <chrono>
 #include <cstdio>
 #include <regex>
+#include <string>
 
-void checkInternetConnection() {
+double
+checkInternetConnection()
+{
   std::chrono::time_point<std::chrono::system_clock> start, end;
   start = std::chrono::system_clock::now();
   std::string response = "";
+  double tmp;
+  double isConnected;
+
   char buffer[1024];
   FILE *pipes = popen("ping google.com -c 1", "r");
-  if (!pipes) {
+  if (!pipes)
+  {
     std::cout << "0" << std::endl;
-    return;
   }
-  while (!feof(pipes)) {
+  while (!feof(pipes))
+  {
     if (fgets(buffer, 1024, pipes) != NULL)
       response += buffer;
   }
@@ -22,13 +29,19 @@ void checkInternetConnection() {
 
   std::regex pattern("time=([0-9.]+)");
   std::smatch matches;
-  if (std::regex_search(response, matches, pattern)) {
-    std::cout << "1" << std::endl;
-    std::cout << "Response time: " << matches[1].str() << " milliseconds" << std::endl;
-  } else {
-    std::cout << "0" << std::endl;
+  if (std::regex_search(response, matches, pattern))
+  {
+    tmp = stod(matches[1].str());
+    isConnected = 1.0;
+    std::cout << isConnected << "   " << tmp << std::endl;
+
+  } else
+  {
+    isConnected = 0.0;
+    std::cout << isConnected << std::endl;
   }
   pclose(pipes);
+
 }
 
 int main() {
