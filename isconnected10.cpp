@@ -5,13 +5,12 @@
 #include <string>
 
 double
-checkInternetConnection()
+checkInternetConnection(int &isConnected)
 {
   std::chrono::time_point<std::chrono::system_clock> start, end;
   start = std::chrono::system_clock::now();
   std::string response = "";
-  double tmp;
-  double isConnected;
+  double time_ping;
 
   char buffer[1024];
   FILE *pipes = popen("ping google.com -c 1", "r");
@@ -31,20 +30,35 @@ checkInternetConnection()
   std::smatch matches;
   if (std::regex_search(response, matches, pattern))
   {
-    tmp = stod(matches[1].str());
-    isConnected = 1.0;
-    std::cout << isConnected << "   " << tmp << std::endl;
+	time_ping = stod(matches[1].str());
+    isConnected = 1;
+    //std::cout << isConnected << "   " << tmp << std::endl;
 
   } else
   {
-    isConnected = 0.0;
-    std::cout << isConnected << std::endl;
+	time_ping = -1;
+    isConnected = 0;
+    //std::cout << isConnected << std::endl;
   }
   pclose(pipes);
+  return time_ping;
 
 }
 
-int main() {
-  checkInternetConnection();
-  return 0;
+void
+recorded_connection_test(int isConnected, double time_ping, double x, double y, double theta)
+{
+    double log_timestamp = carmen_get_time() - tachograph_starttime;
+    stringstream sst;
+	sst << "CONNECTION" << " " <<
+			to_string(isConnected) << " " <<
+			to_string(time_ping) << " " <<
+            to_string(x) << " " <<
+			to_string(y) << " " <<
+			to_string(theta) << " " <<
+			to_string(carmen_get_time()) << " " <<
+			to_string(log_timestamp) <<
+			endl;
+	string line = sst.str();
+	save_single_line_in_file(tachograph_filename, line);
 }
